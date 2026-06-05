@@ -211,6 +211,15 @@ export default function ActiveCustomer({
             )}
           </div>
         </div>
+
+        {/* Done button */}
+        <button
+          onClick={() => { setFading(true); setTimeout(onGoBack, 400) }}
+          className="w-full py-4 rounded-2xl font-bold text-white text-lg mt-2 mb-6 transition-all active:scale-95 hover:opacity-90"
+          style={{ backgroundColor: '#2c2c2a' }}
+        >
+          Done — Tap to start over
+        </button>
       </div>
     </div>
   )
