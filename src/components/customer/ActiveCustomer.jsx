@@ -25,6 +25,9 @@ export default function ActiveCustomer({
   rewards,
   vapeThreshold,
   onGoBack,
+  vapeCardTitle = 'Vape Punch Card',
+  vapeUnder20Label = 'Under $20 vapes',
+  vapeOver20Label = 'Over $20 vapes',
 }) {
   const [customer, setCustomer] = useState(initialCustomer)
   const inactivityTimer = useRef(null)
@@ -173,18 +176,18 @@ export default function ActiveCustomer({
 
         {/* Vape punch card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
-          <h3 className="font-semibold text-gray-700 mb-4 text-base">Vape Punch Card</h3>
+          <h3 className="font-semibold text-gray-700 mb-4 text-base">{vapeCardTitle}</h3>
           <div className="space-y-4">
             {under20Done ? (
               <div className="bg-green-100 border border-green-400 rounded-xl px-4 py-3">
                 <p className="text-green-800 font-semibold text-sm">
-                  You won a free vape! Let the staff know to redeem it (Under $20)
+                  🎉 You won a free vape! Let the staff know to redeem it ({vapeUnder20Label})
                 </p>
               </div>
             ) : (
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">Under $20 vapes</span>
+                  <span className="text-sm text-gray-600">{vapeUnder20Label}</span>
                   <span className="text-xs text-gray-400">{under20Count}/{vapeThreshold}</span>
                 </div>
                 <DotGrid count={Math.min(under20Count, vapeThreshold)} max={vapeThreshold} />
@@ -194,13 +197,13 @@ export default function ActiveCustomer({
             {over20Done ? (
               <div className="bg-green-100 border border-green-400 rounded-xl px-4 py-3">
                 <p className="text-green-800 font-semibold text-sm">
-                  You won a free vape! Let the staff know to redeem it (Over $20)
+                  🎉 You won a free vape! Let the staff know to redeem it ({vapeOver20Label})
                 </p>
               </div>
             ) : (
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">Over $20 vapes</span>
+                  <span className="text-sm text-gray-600">{vapeOver20Label}</span>
                   <span className="text-xs text-gray-400">{over20Count}/{vapeThreshold}</span>
                 </div>
                 <DotGrid count={Math.min(over20Count, vapeThreshold)} max={vapeThreshold} />

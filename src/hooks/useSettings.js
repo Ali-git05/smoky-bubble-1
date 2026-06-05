@@ -13,31 +13,27 @@ export function useSettings() {
   const [vapeThreshold, setVapeThreshold] = useState(7)
   const [googleReviewUrl, setGoogleReviewUrl] = useState('')
   const [rewards, setRewards] = useState(DEFAULT_REWARDS)
+  const [vapeCardTitle, setVapeCardTitle] = useState('Vape Punch Card')
+  const [vapeUnder20Label, setVapeUnder20Label] = useState('Under $20 vapes')
+  const [vapeOver20Label, setVapeOver20Label] = useState('Over $20 vapes')
   const [loading, setLoading] = useState(true)
 
   const parseSettings = useCallback((rows) => {
     if (!rows || rows.length === 0) return
     const map = {}
-    rows.forEach((row) => {
-      map[row.key] = row.value
-    })
-    if (map.points_per_dollar !== undefined) {
-      setPointsPerDollar(Number(map.points_per_dollar) || 1)
-    }
-    if (map.vape_threshold !== undefined) {
-      setVapeThreshold(Number(map.vape_threshold) || 7)
-    }
-    if (map.google_review_url !== undefined) {
-      setGoogleReviewUrl(map.google_review_url)
-    }
+    rows.forEach((row) => { map[row.key] = row.value })
+    if (map.points_per_dollar !== undefined) setPointsPerDollar(Number(map.points_per_dollar) || 1)
+    if (map.vape_threshold !== undefined) setVapeThreshold(Number(map.vape_threshold) || 7)
+    if (map.google_review_url !== undefined) setGoogleReviewUrl(map.google_review_url)
     if (map.rewards !== undefined) {
       try {
         const parsed = JSON.parse(map.rewards)
         if (Array.isArray(parsed)) setRewards(parsed)
-      } catch {
-        setRewards(DEFAULT_REWARDS)
-      }
+      } catch { setRewards(DEFAULT_REWARDS) }
     }
+    if (map.vape_card_title !== undefined) setVapeCardTitle(map.vape_card_title)
+    if (map.vape_under20_label !== undefined) setVapeUnder20Label(map.vape_under20_label)
+    if (map.vape_over20_label !== undefined) setVapeOver20Label(map.vape_over20_label)
   }, [])
 
   const fetchSettings = useCallback(async () => {
@@ -55,29 +51,16 @@ export function useSettings() {
 
   useEffect(() => {
     fetchSettings()
-
     const channel = supabase
       .channel('settings-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'settings' },
-        () => {
-          fetchSettings()
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, () => { fetchSettings() })
       .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return () => { supabase.removeChannel(channel) }
   }, [fetchSettings])
 
   return {
-    pointsPerDollar,
-    vapeThreshold,
-    googleReviewUrl,
-    rewards,
-    loading,
-    refetch: fetchSettings,
+    pointsPerDollar, vapeThreshold, googleReviewUrl, rewards,
+    vapeCardTitle, vapeUnder20Label, vapeOver20Label,
+    loading, refetch: fetchSettings,
   }
 }

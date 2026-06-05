@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../../lib/supabase'
+import CustomNumberPad from './CustomNumberPad'
+import CustomQWERTY from './CustomQWERTY'
 
 const DEFAULT_REVIEW_URL = 'https://g.page/r/your-google-review-link'
 
 export default function WelcomeState({ googleReviewUrl, onCustomerFound }) {
+  const [step, setStep] = useState(1)
   const [phone, setPhone] = useState('')
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
@@ -15,111 +18,162 @@ export default function WelcomeState({ googleReviewUrl, onCustomerFound }) {
     googleReviewUrl.trim() !== '' &&
     googleReviewUrl !== DEFAULT_REVIEW_URL
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const cleanPhone = phone.replace(/\D/g, '')
-    if (!cleanPhone) {
-      setError('Please enter your phone number')
-      return
-    }
-    setError('')
+  const handlePhoneNext = async () => {
+    if (phone.length < 10 || loading) return
     setLoading(true)
+    setError('')
     try {
-      const { data: existing, error: lookupErr } = await supabase
+      const { data, error: err } = await supabase
         .from('customers')
         .select('*')
-        .eq('phone', cleanPhone)
+        .eq('phone', phone)
         .single()
 
-      if (lookupErr && lookupErr.code !== 'PGRST116') throw lookupErr
+      if (err && err.code !== 'PGRST116') throw err
 
-      if (existing) {
-        onCustomerFound(existing)
+      if (data) {
+        onCustomerFound(data)
       } else {
-        const cleanName = name.trim() || 'Guest'
-        const { data: newCustomer, error: insertErr } = await supabase
-          .from('customers')
-          .insert({
-            name: cleanName,
-            phone: cleanPhone,
-            points: 0,
-            vape_under20_count: 0,
-            vape_over20_count: 0,
-          })
-          .select()
-          .single()
-        if (insertErr) throw insertErr
-        onCustomerFound(newCustomer)
+        setStep(2)
       }
-    } catch (err) {
+    } catch {
       setError('Something went wrong. Please try again.')
-      console.error(err)
     } finally {
       setLoading(false)
     }
   }
 
+  const handleNameDone = async () => {
+    if (!name.trim() || loading) return
+    setLoading(true)
+    setError('')
+    try {
+      const { data, error: err } = await supabase
+        .from('customers')
+        .insert({ name: name.trim(), phone, points: 0, vape_under20_count: 0, vape_over20_count: 0 })
+        .select()
+        .single()
+      if (err) throw err
+      onCustomerFound(data)
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleBack = () => {
+    setStep(1)
+    setName('')
+    setError('')
+  }
+
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 py-10">
-      <div className="w-full max-w-md mx-auto flex flex-col items-center">
-        <img
-          src="/logo.png"
-          alt="Smoky Bubble"
-          className="mb-6"
-          style={{ width: 200, height: 'auto', objectFit: 'contain' }}
-        />
+    <div
+      className="h-screen overflow-hidden relative bg-white"
+      style={{ userSelect: 'none' }}
+    >
+      {/* Step 1 — Phone */}
+      <div
+        className="absolute inset-0 flex flex-col items-center overflow-hidden"
+        style={{
+          transform: step === 1 ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 0.3s ease-in-out',
+        }}
+      >
+        <div className="flex flex-col items-center w-full px-6 pt-6">
+          <img
+            src="/logo.png"
+            alt="Smoky Bubble"
+            style={{ height: 64, objectFit: 'contain' }}
+            className="mb-3"
+          />
+          <h1 className="font-bold text-gray-900 text-center mb-1" style={{ fontSize: '30px' }}>
+            Welcome in! 👋
+          </h1>
+          <p className="text-gray-400 text-center mb-4 text-base">
+            Enter your phone number
+          </p>
 
-        <h1 className="font-bold text-gray-900 text-center mb-2" style={{ fontSize: '48px', lineHeight: 1.1 }}>
-          Welcome in! 👋
-        </h1>
-        <p className="text-gray-500 text-center mb-8" style={{ fontSize: '24px' }}>
-          Earn points on every purchase
-        </p>
-
-        <form onSubmit={handleSubmit} className="w-full space-y-4">
-          <div>
-            <input
-              type="tel"
-              inputMode="numeric"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-              placeholder="Your phone number"
-              className="w-full border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 focus:outline-none focus:border-brand transition-colors"
-              style={{ fontSize: '32px' }}
-            />
-          </div>
-          <div>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name (new members)"
-              className="w-full border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 focus:outline-none focus:border-brand transition-colors text-2xl"
-            />
-          </div>
-
-          {error && (
-            <p className="text-red-500 text-center text-base">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || !phone.trim()}
-            className="w-full text-white font-bold rounded-2xl py-5 text-2xl transition-opacity disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 min-h-[72px]"
-            style={{ backgroundColor: '#639922' }}
+          {/* Phone display */}
+          <div
+            className="w-full max-w-xs mb-4 text-center py-3 px-4 rounded-2xl bg-gray-50 font-bold text-gray-900 tracking-widest"
+            style={{
+              fontSize: '32px',
+              minHeight: 70,
+              border: `2px solid ${phone.length > 0 ? '#639922' : '#e5e7eb'}`,
+              lineHeight: '1.3',
+            }}
           >
-            {loading ? 'Checking...' : 'Check My Points'}
-          </button>
-        </form>
+            {phone.length > 0 ? phone : <span className="text-gray-300">__________</span>}
+          </div>
+
+          <CustomNumberPad
+            value={phone}
+            onChange={setPhone}
+            onNext={handlePhoneNext}
+            loading={loading}
+          />
+
+          {error && <p className="mt-3 text-red-500 text-sm text-center">{error}</p>}
+        </div>
 
         {showQr && (
-          <div className="mt-10 flex flex-col items-center text-center">
-            <p className="text-gray-500 text-base mb-3">
-              Enjoyed your visit? Leave us a review ⭐
-            </p>
-            <QRCodeSVG value={googleReviewUrl} size={150} />
+          <div className="mt-auto pb-4 flex flex-col items-center text-center">
+            <p className="text-gray-400 text-xs mb-2">Enjoyed your visit? Leave us a review ⭐</p>
+            <QRCodeSVG value={googleReviewUrl} size={90} />
           </div>
         )}
+      </div>
+
+      {/* Step 2 — Name */}
+      <div
+        className="absolute inset-0 flex flex-col items-center overflow-hidden"
+        style={{
+          transform: step === 2 ? 'translateX(0)' : 'translateX(100%)',
+          transition: 'transform 0.3s ease-in-out',
+        }}
+      >
+        <div className="flex flex-col items-center w-full px-4 pt-6">
+          <img
+            src="/logo.png"
+            alt="Smoky Bubble"
+            style={{ height: 64, objectFit: 'contain' }}
+            className="mb-3"
+          />
+          <h1 className="font-bold text-gray-900 text-center mb-1" style={{ fontSize: '28px' }}>
+            You're new here! 🎉
+          </h1>
+          <p className="text-gray-400 text-center mb-4 text-base">
+            What's your name?
+          </p>
+
+          {/* Name display */}
+          <div
+            className="w-full max-w-sm mb-4 text-center py-3 px-4 rounded-2xl bg-gray-50 font-semibold text-gray-900"
+            style={{
+              fontSize: '26px',
+              minHeight: 64,
+              border: `2px solid ${name.length > 0 ? '#639922' : '#e5e7eb'}`,
+              lineHeight: '1.3',
+            }}
+          >
+            {name.length > 0 ? name : <span className="text-gray-300">Your name</span>}
+          </div>
+
+          <div className="w-full max-w-lg">
+            <CustomQWERTY value={name} onChange={setName} onSubmit={handleNameDone} loading={loading} />
+          </div>
+
+          {error && <p className="mt-2 text-red-500 text-sm text-center">{error}</p>}
+
+          <button
+            onPointerDown={(e) => { e.preventDefault(); handleBack() }}
+            className="mt-3 text-gray-400 text-sm hover:text-gray-600 transition-colors py-2"
+          >
+            ← Back
+          </button>
+        </div>
       </div>
     </div>
   )

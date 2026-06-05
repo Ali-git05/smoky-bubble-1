@@ -8,8 +8,8 @@ import EditPoints from '../components/staff/EditPoints'
 import RedeemRewards from '../components/staff/RedeemRewards'
 import VapePunchCard from '../components/staff/VapePunchCard'
 import ManageRewardsTab from '../components/staff/ManageRewardsTab'
+import AllCustomersTab from '../components/staff/AllCustomersTab'
 
-// Simple toast component
 function Toast({ message, type, onDismiss }) {
   useEffect(() => {
     const t = setTimeout(onDismiss, 3000)
@@ -51,11 +51,21 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here`}
   )
 }
 
+const TABS = [
+  { key: 'customers', label: 'Customers' },
+  { key: 'all', label: 'All Customers' },
+  { key: 'manage', label: 'Manage Rewards' },
+]
+
 export default function StaffPage() {
   const [activeTab, setActiveTab] = useState('customers')
   const [customer, setCustomer] = useState(null)
   const [toast, setToast] = useState(null)
-  const { pointsPerDollar, vapeThreshold, googleReviewUrl, rewards, loading, refetch } = useSettings()
+  const {
+    pointsPerDollar, vapeThreshold, googleReviewUrl, rewards,
+    vapeCardTitle, vapeUnder20Label, vapeOver20Label,
+    loading, refetch,
+  } = useSettings()
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type, id: Date.now() })
@@ -63,32 +73,20 @@ export default function StaffPage() {
 
   const dismissToast = useCallback(() => setToast(null), [])
 
-  // Subscribe to realtime updates for active customer
   useEffect(() => {
     if (!customer?.id) return
     const channel = supabase
       .channel(`staff-customer-${customer.id}`)
       .on(
         'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'customers',
-          filter: `id=eq.${customer.id}`,
-        },
-        (payload) => {
-          setCustomer(payload.new)
-        }
+        { event: 'UPDATE', schema: 'public', table: 'customers', filter: `id=eq.${customer.id}` },
+        (payload) => { setCustomer(payload.new) }
       )
       .subscribe()
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return () => { supabase.removeChannel(channel) }
   }, [customer?.id])
 
-  if (!supabaseConfigured) {
-    return <SetupBanner />
-  }
+  if (!supabaseConfigured) return <SetupBanner />
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -99,19 +97,13 @@ export default function StaffPage() {
           <span className="text-white font-bold text-xl">Smoky Bubble 🫧</span>
         </div>
 
-        {/* Tab bar */}
         <div className="max-w-4xl mx-auto px-4 flex gap-0 border-t border-white/10">
-          {[
-            { key: 'customers', label: 'Customers' },
-            { key: 'manage', label: 'Manage Rewards' },
-          ].map((tab) => (
+          {TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`px-5 py-3 text-sm font-semibold transition-colors relative ${
-                activeTab === tab.key
-                  ? 'text-white'
-                  : 'text-white/60 hover:text-white/90'
+                activeTab === tab.key ? 'text-white' : 'text-white/60 hover:text-white/90'
               }`}
             >
               {tab.label}
@@ -128,30 +120,19 @@ export default function StaffPage() {
 
       {/* Main content */}
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6">
-        {activeTab === 'customers' ? (
+        {activeTab === 'customers' && (
           <>
-            <CustomerLookup
-              onCustomerFound={setCustomer}
-              onShowToast={showToast}
-            />
+            <CustomerLookup onCustomerFound={setCustomer} onShowToast={showToast} />
             {customer && (
               <>
-                <CustomerProfile
-                  customer={customer}
-                  rewards={rewards}
-                  onClear={() => setCustomer(null)}
-                />
+                <CustomerProfile customer={customer} rewards={rewards} onClear={() => setCustomer(null)} />
                 <AddPoints
                   customer={customer}
                   pointsPerDollar={pointsPerDollar}
                   onPointsUpdated={setCustomer}
                   onShowToast={showToast}
                 />
-                <EditPoints
-                  customer={customer}
-                  onPointsUpdated={setCustomer}
-                  onShowToast={showToast}
-                />
+                <EditPoints customer={customer} onPointsUpdated={setCustomer} onShowToast={showToast} />
                 <RedeemRewards
                   customer={customer}
                   rewards={rewards}
@@ -163,16 +144,32 @@ export default function StaffPage() {
                   vapeThreshold={vapeThreshold}
                   onCustomerUpdated={setCustomer}
                   onShowToast={showToast}
+                  vapeCardTitle={vapeCardTitle}
+                  vapeUnder20Label={vapeUnder20Label}
+                  vapeOver20Label={vapeOver20Label}
                 />
               </>
             )}
           </>
-        ) : (
+        )}
+
+        {activeTab === 'all' && (
+          <AllCustomersTab
+            vapeUnder20Label={vapeUnder20Label}
+            vapeOver20Label={vapeOver20Label}
+            onShowToast={showToast}
+          />
+        )}
+
+        {activeTab === 'manage' && (
           <ManageRewardsTab
             pointsPerDollar={pointsPerDollar}
             vapeThreshold={vapeThreshold}
             googleReviewUrl={googleReviewUrl}
             rewards={rewards}
+            vapeCardTitle={vapeCardTitle}
+            vapeUnder20Label={vapeUnder20Label}
+            vapeOver20Label={vapeOver20Label}
             onShowToast={showToast}
             onRefetch={refetch}
           />
@@ -180,12 +177,7 @@ export default function StaffPage() {
       </main>
 
       {toast && (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          onDismiss={dismissToast}
-        />
+        <Toast key={toast.id} message={toast.message} type={toast.type} onDismiss={dismissToast} />
       )}
     </div>
   )

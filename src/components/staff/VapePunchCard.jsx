@@ -158,12 +158,17 @@ function PunchTracker({ label, count, threshold, fieldName, customer, onUpdated,
   )
 }
 
-export default function VapePunchCard({ customer, vapeThreshold, onCustomerUpdated, onShowToast }) {
+export default function VapePunchCard({
+  customer, vapeThreshold, onCustomerUpdated, onShowToast,
+  vapeCardTitle = 'Vape Punch Card',
+  vapeUnder20Label = 'Under $20 vapes',
+  vapeOver20Label = 'Over $20 vapes',
+}) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-4">
-      <h3 className="text-base font-semibold text-gray-700 mb-4">Vape Punch Card</h3>
+      <h3 className="text-base font-semibold text-gray-700 mb-4">{vapeCardTitle}</h3>
       <PunchTracker
-        label="Under $20 vapes"
+        label={vapeUnder20Label}
         count={customer.vape_under20_count ?? 0}
         threshold={vapeThreshold}
         fieldName="vape_under20_count"
@@ -173,7 +178,7 @@ export default function VapePunchCard({ customer, vapeThreshold, onCustomerUpdat
       />
       <div className="border-t border-gray-100 pt-4">
         <PunchTracker
-          label="Over $20 vapes"
+          label={vapeOver20Label}
           count={customer.vape_over20_count ?? 0}
           threshold={vapeThreshold}
           fieldName="vape_over20_count"
