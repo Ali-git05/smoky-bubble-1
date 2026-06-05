@@ -1,0 +1,32 @@
+{
+  "name": "Smoky Bubble",
+  "short_name": "Smoky Bubble",
+  "description": "Smoky Bubble Loyalty Program",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2c2c2a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Staff Dashboard",
+      "short_name": "Staff",
+      "url": "/staff",
+      "icons": [{ "src": "/logo.png", "sizes": "any" }]
+    },
+    {
+      "name": "Customer Display",
+      "short_name": "Customer",
+      "url": "/customer",
+      "icons": [{ "src": "/logo.png", "sizes": "any" }]
+    }
+  ]
+}

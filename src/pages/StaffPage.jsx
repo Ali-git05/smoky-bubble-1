@@ -89,7 +89,7 @@ export default function StaffPage() {
   if (!supabaseConfigured) return <SetupBanner />
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Header */}
       <header className="sticky top-0 z-10 shadow-sm" style={{ backgroundColor: '#2c2c2a' }}>
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -119,7 +119,7 @@ export default function StaffPage() {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6">
+      <main className="flex-1 overflow-y-auto max-w-4xl mx-auto w-full px-4 py-6">
         {activeTab === 'customers' && (
           <>
             <CustomerLookup onCustomerFound={setCustomer} onShowToast={showToast} />

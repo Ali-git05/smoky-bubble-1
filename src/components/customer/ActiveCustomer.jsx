@@ -59,7 +59,7 @@ export default function ActiveCustomer({
 
   return (
     <div
-      className="min-h-screen bg-gray-50 flex flex-col transition-opacity duration-500"
+      className="h-screen bg-gray-50 flex flex-col overflow-y-auto transition-opacity duration-500"
       style={{ opacity: fading ? 0 : 1 }}
     >
       <div className="flex-1 max-w-2xl mx-auto w-full px-6 py-6 flex flex-col">
