@@ -21,7 +21,7 @@ function SetupBanner() {
 
 export default function CustomerPage() {
   const [activeCustomer, setActiveCustomer] = useState(null)
-  const { googleReviewUrl, rewards, vapeThreshold, vapeCardTitle, vapeUnder20Label, vapeOver20Label, loading } = useSettings()
+  const { googleReviewUrl, rewards, loading } = useSettings()
 
   const handleCustomerFound = useCallback((customer) => {
     setActiveCustomer(customer)
@@ -46,11 +46,8 @@ export default function CustomerPage() {
       <ActiveCustomer
         initialCustomer={activeCustomer}
         rewards={rewards}
-        vapeThreshold={vapeThreshold}
         onGoBack={handleGoBack}
-        vapeCardTitle={vapeCardTitle}
-        vapeUnder20Label={vapeUnder20Label}
-        vapeOver20Label={vapeOver20Label}
+        googleReviewUrl={googleReviewUrl}
       />
     )
   }

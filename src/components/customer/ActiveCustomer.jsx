@@ -1,46 +1,24 @@
 import { useEffect, useState, useRef } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../../lib/supabase'
 
-function DotGrid({ count, max }) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {Array.from({ length: max }).map((_, i) => (
-        <span
-          key={i}
-          className="inline-block rounded-full"
-          style={{
-            width: 22,
-            height: 22,
-            backgroundColor: i < count ? '#639922' : '#d1d5db',
-            flexShrink: 0,
-          }}
-        />
-      ))}
-    </div>
-  )
-}
+const DEFAULT_REVIEW_URL = 'https://g.page/r/your-google-review-link'
 
 export default function ActiveCustomer({
   initialCustomer,
   rewards,
-  vapeThreshold,
   onGoBack,
-  vapeCardTitle = 'Vape Punch Card',
-  vapeUnder20Label = 'Under $20 vapes',
-  vapeOver20Label = 'Over $20 vapes',
+  googleReviewUrl,
 }) {
   const [customer, setCustomer] = useState(initialCustomer)
   const inactivityTimer = useRef(null)
   const [fading, setFading] = useState(false)
 
-  // Inactivity: 45 seconds → fade back to welcome
   const resetTimer = () => {
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current)
     inactivityTimer.current = setTimeout(() => {
       setFading(true)
-      setTimeout(() => {
-        onGoBack()
-      }, 600)
+      setTimeout(onGoBack, 600)
     }, 45000)
   }
 
@@ -55,27 +33,17 @@ export default function ActiveCustomer({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Real-time subscription for this customer
   useEffect(() => {
     if (!initialCustomer?.id) return
     const channel = supabase
       .channel(`customer-${initialCustomer.id}`)
       .on(
         'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'customers',
-          filter: `id=eq.${initialCustomer.id}`,
-        },
-        (payload) => {
-          setCustomer(payload.new)
-        }
+        { event: 'UPDATE', schema: 'public', table: 'customers', filter: `id=eq.${initialCustomer.id}` },
+        (payload) => { setCustomer(payload.new) }
       )
       .subscribe()
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return () => { supabase.removeChannel(channel) }
   }, [initialCustomer?.id])
 
   const sortedRewards = [...rewards].sort((a, b) => a.pts - b.pts)
@@ -84,20 +52,21 @@ export default function ActiveCustomer({
     ? Math.min(100, Math.round((customer.points / nextReward.pts) * 100))
     : 100
 
-  const under20Count = customer.vape_under20_count ?? 0
-  const over20Count = customer.vape_over20_count ?? 0
-  const under20Done = under20Count >= vapeThreshold
-  const over20Done = over20Count >= vapeThreshold
+  const showQr =
+    googleReviewUrl &&
+    googleReviewUrl.trim() !== '' &&
+    googleReviewUrl !== DEFAULT_REVIEW_URL
 
   return (
     <div
-      className="min-h-screen bg-gray-50 flex flex-col items-center px-6 py-8 transition-opacity duration-500"
+      className="min-h-screen bg-gray-50 flex flex-col transition-opacity duration-500"
       style={{ opacity: fading ? 0 : 1 }}
     >
-      <div className="w-full max-w-lg mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <img src="/logo.png" alt="Smoky Bubble" style={{ height: 48, objectFit: 'contain' }} />
+      <div className="flex-1 max-w-2xl mx-auto w-full px-6 py-6 flex flex-col">
+
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-5">
+          <img src="/logo.png" alt="Smoky Bubble" style={{ height: 44, objectFit: 'contain' }} />
           <button
             onClick={() => { setFading(true); setTimeout(onGoBack, 400) }}
             className="text-gray-400 text-sm hover:text-gray-600 transition-colors px-3 py-2 rounded-lg hover:bg-gray-200"
@@ -107,39 +76,31 @@ export default function ActiveCustomer({
         </div>
 
         {/* Greeting */}
-        <h1 className="font-bold text-gray-900 mb-1" style={{ fontSize: '40px', lineHeight: 1.1 }}>
+        <h1 className="font-bold text-gray-900 mb-4" style={{ fontSize: '42px', lineHeight: 1.1 }}>
           Hey {customer.name}! 👋
         </h1>
 
-        {/* Points display */}
+        {/* Points card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-5 text-center">
-          <div
-            className="font-black leading-none mb-1"
-            style={{ fontSize: '80px', color: '#639922' }}
-          >
+          <div className="font-black leading-none mb-1" style={{ fontSize: '88px', color: '#639922' }}>
             {customer.points}
           </div>
-          <div className="uppercase tracking-widest text-gray-400 font-semibold" style={{ fontSize: '24px' }}>
+          <div className="uppercase tracking-widest text-gray-400 font-semibold mb-4" style={{ fontSize: '22px' }}>
             POINTS
           </div>
-
-          <div className="mt-4">
-            <div className="w-full bg-gray-100 rounded-full h-3 mb-2">
-              <div
-                className="h-3 rounded-full transition-all duration-700"
-                style={{ width: `${progressPct}%`, backgroundColor: '#639922' }}
-              />
-            </div>
-            {nextReward ? (
-              <p className="text-sm text-gray-500">
-                <span className="font-semibold text-gray-700">{nextReward.pts - customer.points} pts</span> to {nextReward.emoji} {nextReward.name}
-              </p>
-            ) : (
-              <p className="text-sm font-semibold" style={{ color: '#639922' }}>
-                All rewards unlocked!
-              </p>
-            )}
+          <div className="w-full bg-gray-100 rounded-full h-3 mb-2">
+            <div
+              className="h-3 rounded-full transition-all duration-700"
+              style={{ width: `${progressPct}%`, backgroundColor: '#639922' }}
+            />
           </div>
+          {nextReward ? (
+            <p className="text-sm text-gray-500">
+              <span className="font-semibold text-gray-700">{nextReward.pts - customer.points} pts</span> away from {nextReward.emoji} {nextReward.name}
+            </p>
+          ) : (
+            <p className="text-sm font-semibold" style={{ color: '#639922' }}>All rewards unlocked! 🎉</p>
+          )}
         </div>
 
         {/* Rewards grid */}
@@ -150,22 +111,20 @@ export default function ActiveCustomer({
               <div
                 key={reward.name}
                 className={`rounded-xl border-2 p-4 transition-all ${
-                  unlocked
-                    ? 'border-brand bg-green-50'
-                    : 'border-gray-200 bg-white'
+                  unlocked ? 'border-brand bg-green-50' : 'border-gray-200 bg-white'
                 }`}
               >
-                <div className="text-2xl mb-1">{reward.emoji}</div>
+                <div className="text-3xl mb-1">{reward.emoji}</div>
                 <div className={`text-sm font-semibold ${unlocked ? 'text-gray-900' : 'text-gray-500'}`}>
                   {reward.name}
                 </div>
-                <div className="flex items-center justify-between mt-1">
-                  <span className={`text-xs ${unlocked ? 'text-brand font-bold' : 'text-gray-400'}`}>
+                <div className="flex items-center justify-between mt-2">
+                  <span className={`text-xs font-bold ${unlocked ? 'text-brand' : 'text-gray-400'}`}>
                     {reward.pts} pts
                   </span>
                   {unlocked && (
                     <span className="text-xs bg-brand text-white px-2 py-0.5 rounded-full font-semibold">
-                      ✓ Unlocked!
+                      ✓ Unlocked
                     </span>
                   )}
                 </div>
@@ -174,52 +133,27 @@ export default function ActiveCustomer({
           })}
         </div>
 
-        {/* Vape punch card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
-          <h3 className="font-semibold text-gray-700 mb-4 text-base">{vapeCardTitle}</h3>
-          <div className="space-y-4">
-            {under20Done ? (
-              <div className="bg-green-100 border border-green-400 rounded-xl px-4 py-3">
-                <p className="text-green-800 font-semibold text-sm">
-                  🎉 You won a free vape! Let the staff know to redeem it ({vapeUnder20Label})
-                </p>
-              </div>
-            ) : (
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">{vapeUnder20Label}</span>
-                  <span className="text-xs text-gray-400">{under20Count}/{vapeThreshold}</span>
-                </div>
-                <DotGrid count={Math.min(under20Count, vapeThreshold)} max={vapeThreshold} />
-              </div>
-            )}
-
-            {over20Done ? (
-              <div className="bg-green-100 border border-green-400 rounded-xl px-4 py-3">
-                <p className="text-green-800 font-semibold text-sm">
-                  🎉 You won a free vape! Let the staff know to redeem it ({vapeOver20Label})
-                </p>
-              </div>
-            ) : (
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">{vapeOver20Label}</span>
-                  <span className="text-xs text-gray-400">{over20Count}/{vapeThreshold}</span>
-                </div>
-                <DotGrid count={Math.min(over20Count, vapeThreshold)} max={vapeThreshold} />
-              </div>
-            )}
+        {/* QR code review card */}
+        {showQr && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-5 flex items-center gap-5">
+            <QRCodeSVG value={googleReviewUrl} size={90} />
+            <div>
+              <p className="font-semibold text-gray-800 text-base mb-0.5">Enjoyed your visit?</p>
+              <p className="text-gray-500 text-sm">Scan to leave us a Google review ⭐</p>
+              <p className="text-gray-400 text-xs mt-1">It means the world to us!</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Done button */}
         <button
           onClick={() => { setFading(true); setTimeout(onGoBack, 400) }}
-          className="w-full py-4 rounded-2xl font-bold text-white text-lg mt-2 mb-6 transition-all active:scale-95 hover:opacity-90"
+          className="w-full py-4 rounded-2xl font-bold text-white text-lg transition-all active:scale-95 hover:opacity-90 mt-auto"
           style={{ backgroundColor: '#2c2c2a' }}
         >
           Done — Tap to start over
         </button>
+
       </div>
     </div>
   )
