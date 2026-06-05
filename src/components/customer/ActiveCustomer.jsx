@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../../lib/supabase'
+import LogoTile from './LogoTile'
 
 const DEFAULT_REVIEW_URL = 'https://g.page/r/your-google-review-link'
 
@@ -57,7 +58,7 @@ export default function ActiveCustomer({ initialCustomer, rewards, onGoBack, goo
 
         {/* Header */}
         <div className="flex items-center justify-between flex-shrink-0 mb-2">
-          <img src="/logo.png" alt="Smoky Bubble" style={{ height: 34, objectFit: 'contain' }} />
+          <LogoTile size={44} />
           <button onClick={goBack} className="text-gray-400 text-sm px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors">
             Not you?
           </button>

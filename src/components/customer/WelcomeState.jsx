@@ -3,6 +3,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../../lib/supabase'
 import CustomNumberPad from './CustomNumberPad'
 import CustomQWERTY from './CustomQWERTY'
+import LogoTile from './LogoTile'
 
 const DEFAULT_REVIEW_URL = 'https://g.page/r/your-google-review-link'
 
@@ -62,13 +63,12 @@ export default function WelcomeState({ googleReviewUrl, onCustomerFound }) {
         style={{ transform: step === 1 ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 0.3s ease-in-out' }}
       >
         {/* Top content */}
-        <div className="flex flex-col items-center w-full px-6 pt-5 flex-shrink-0">
-          <img src="/logo.png" alt="Smoky Bubble" style={{ height: 56, objectFit: 'contain' }} className="mb-2" />
+        <div className="flex flex-col items-center w-full px-6 pt-4 flex-shrink-0">
+          <LogoTile size={120} />
+          <p className="font-bold text-gray-900 text-center mt-2" style={{ fontSize: 20 }}>Smoky Bubble</p>
+          <p className="text-gray-400 text-center mb-3" style={{ fontSize: 13 }}>Loyalty Rewards</p>
 
-          <h1 className="font-bold text-gray-900 text-center mb-1" style={{ fontSize: 26 }}>
-            Welcome in! 👋
-          </h1>
-          <p className="text-gray-400 text-center mb-3 text-sm">
+          <p className="text-gray-500 text-center mb-2 text-sm font-medium">
             Enter your phone number
           </p>
 
@@ -107,10 +107,9 @@ export default function WelcomeState({ googleReviewUrl, onCustomerFound }) {
         className="absolute inset-0 flex flex-col items-center"
         style={{ transform: step === 2 ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.3s ease-in-out' }}
       >
-        <div className="flex flex-col items-center w-full px-4 pt-5">
-          <img src="/logo.png" alt="Smoky Bubble" style={{ height: 48, objectFit: 'contain' }} className="mb-2" />
-
-          <h1 className="font-bold text-gray-900 text-center mb-1" style={{ fontSize: 24 }}>
+        <div className="flex flex-col items-center w-full px-4 pt-4">
+          <LogoTile size={64} />
+          <h1 className="font-bold text-gray-900 text-center mt-2 mb-0.5" style={{ fontSize: 22 }}>
             You're new here! 🎉
           </h1>
           <p className="text-gray-400 text-center mb-3 text-sm">
