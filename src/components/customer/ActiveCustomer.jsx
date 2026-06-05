@@ -4,15 +4,12 @@ import { supabase } from '../../lib/supabase'
 
 const DEFAULT_REVIEW_URL = 'https://g.page/r/your-google-review-link'
 
-export default function ActiveCustomer({
-  initialCustomer,
-  rewards,
-  onGoBack,
-  googleReviewUrl,
-}) {
+export default function ActiveCustomer({ initialCustomer, rewards, onGoBack, googleReviewUrl }) {
   const [customer, setCustomer] = useState(initialCustomer)
   const inactivityTimer = useRef(null)
   const [fading, setFading] = useState(false)
+
+  const goBack = () => { setFading(true); setTimeout(onGoBack, 400) }
 
   const resetTimer = () => {
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current)
@@ -37,122 +34,105 @@ export default function ActiveCustomer({
     if (!initialCustomer?.id) return
     const channel = supabase
       .channel(`customer-${initialCustomer.id}`)
-      .on(
-        'postgres_changes',
+      .on('postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'customers', filter: `id=eq.${initialCustomer.id}` },
-        (payload) => { setCustomer(payload.new) }
+        (payload) => setCustomer(payload.new)
       )
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    return () => supabase.removeChannel(channel)
   }, [initialCustomer?.id])
 
   const sortedRewards = [...rewards].sort((a, b) => a.pts - b.pts)
   const nextReward = sortedRewards.find((r) => r.pts > customer.points)
-  const progressPct = nextReward
-    ? Math.min(100, Math.round((customer.points / nextReward.pts) * 100))
-    : 100
-
-  const showQr =
-    googleReviewUrl &&
-    googleReviewUrl.trim() !== '' &&
-    googleReviewUrl !== DEFAULT_REVIEW_URL
+  const progressPct = nextReward ? Math.min(100, Math.round((customer.points / nextReward.pts) * 100)) : 100
+  const showQr = googleReviewUrl && googleReviewUrl.trim() !== '' && googleReviewUrl !== DEFAULT_REVIEW_URL
 
   return (
     <div
-      className="h-screen bg-gray-50 flex flex-col overflow-y-auto transition-opacity duration-500"
-      style={{ opacity: fading ? 0 : 1 }}
+      className="h-screen w-screen overflow-hidden bg-gray-50 flex flex-col"
+      style={{ opacity: fading ? 0 : 1, transition: 'opacity 0.4s' }}
     >
-      <div className="flex-1 max-w-2xl mx-auto w-full px-6 py-6 flex flex-col">
+      {/* Single centered column, fixed height, no scroll */}
+      <div className="flex-1 overflow-hidden flex flex-col max-w-3xl mx-auto w-full px-5 py-3">
 
-        {/* Header row */}
-        <div className="flex items-center justify-between mb-5">
-          <img src="/logo.png" alt="Smoky Bubble" style={{ height: 44, objectFit: 'contain' }} />
-          <button
-            onClick={() => { setFading(true); setTimeout(onGoBack, 400) }}
-            className="text-gray-400 text-sm hover:text-gray-600 transition-colors px-3 py-2 rounded-lg hover:bg-gray-200"
-          >
+        {/* Header */}
+        <div className="flex items-center justify-between flex-shrink-0 mb-2">
+          <img src="/logo.png" alt="Smoky Bubble" style={{ height: 34, objectFit: 'contain' }} />
+          <button onClick={goBack} className="text-gray-400 text-sm px-3 py-1.5 rounded-lg hover:bg-gray-200 transition-colors">
             Not you?
           </button>
         </div>
 
         {/* Greeting */}
-        <h1 className="font-bold text-gray-900 mb-4" style={{ fontSize: '42px', lineHeight: 1.1 }}>
+        <h1 className="font-bold text-gray-900 flex-shrink-0 mb-2" style={{ fontSize: 28, lineHeight: 1.2 }}>
           Hey {customer.name}! 👋
         </h1>
 
         {/* Points card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-5 text-center">
-          <div className="font-black leading-none mb-1" style={{ fontSize: '88px', color: '#639922' }}>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-3 flex-shrink-0 mb-3 text-center">
+          <div className="font-black leading-none" style={{ fontSize: 68, color: '#639922' }}>
             {customer.points}
           </div>
-          <div className="uppercase tracking-widest text-gray-400 font-semibold mb-4" style={{ fontSize: '22px' }}>
+          <div className="uppercase tracking-widest text-gray-400 font-semibold mt-1 mb-2" style={{ fontSize: 14 }}>
             POINTS
           </div>
-          <div className="w-full bg-gray-100 rounded-full h-3 mb-2">
+          <div className="w-full bg-gray-100 rounded-full mb-1" style={{ height: 10 }}>
             <div
-              className="h-3 rounded-full transition-all duration-700"
-              style={{ width: `${progressPct}%`, backgroundColor: '#639922' }}
+              className="rounded-full transition-all duration-700"
+              style={{ height: 10, width: `${progressPct}%`, backgroundColor: '#639922' }}
             />
           </div>
           {nextReward ? (
-            <p className="text-sm text-gray-500">
-              <span className="font-semibold text-gray-700">{nextReward.pts - customer.points} pts</span> away from {nextReward.emoji} {nextReward.name}
+            <p className="text-xs text-gray-500">
+              <span className="font-semibold text-gray-700">{nextReward.pts - customer.points} pts</span>
+              {' '}away from {nextReward.emoji} {nextReward.name}
             </p>
           ) : (
-            <p className="text-sm font-semibold" style={{ color: '#639922' }}>All rewards unlocked! 🎉</p>
+            <p className="text-xs font-semibold" style={{ color: '#639922' }}>All rewards unlocked! 🎉</p>
           )}
         </div>
 
-        {/* Rewards grid */}
-        <div className="grid grid-cols-2 gap-3 mb-5">
+        {/* Rewards — 4 per row in landscape, compact height */}
+        <div className="grid grid-cols-4 gap-2 flex-shrink-0 mb-3">
           {sortedRewards.map((reward) => {
             const unlocked = customer.points >= reward.pts
             return (
               <div
                 key={reward.name}
-                className={`rounded-xl border-2 p-4 transition-all ${
-                  unlocked ? 'border-brand bg-green-50' : 'border-gray-200 bg-white'
-                }`}
+                className={`rounded-xl border-2 px-2 py-2 ${unlocked ? 'border-brand bg-green-50' : 'border-gray-200 bg-white'}`}
               >
-                <div className="text-3xl mb-1">{reward.emoji}</div>
-                <div className={`text-sm font-semibold ${unlocked ? 'text-gray-900' : 'text-gray-500'}`}>
+                <div style={{ fontSize: 22 }}>{reward.emoji}</div>
+                <div className={`text-xs font-semibold mt-0.5 leading-tight truncate ${unlocked ? 'text-gray-900' : 'text-gray-500'}`}>
                   {reward.name}
                 </div>
-                <div className="flex items-center justify-between mt-2">
-                  <span className={`text-xs font-bold ${unlocked ? 'text-brand' : 'text-gray-400'}`}>
-                    {reward.pts} pts
-                  </span>
-                  {unlocked && (
-                    <span className="text-xs bg-brand text-white px-2 py-0.5 rounded-full font-semibold">
-                      ✓ Unlocked
-                    </span>
-                  )}
+                <div className="flex items-center justify-between mt-1">
+                  <span className={`text-xs font-bold ${unlocked ? 'text-brand' : 'text-gray-400'}`}>{reward.pts}</span>
+                  {unlocked && <span className="text-xs font-bold text-brand">✓</span>}
                 </div>
               </div>
             )
           })}
         </div>
 
-        {/* QR code review card */}
-        {showQr && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-5 flex items-center gap-5">
-            <QRCodeSVG value={googleReviewUrl} size={90} />
-            <div>
-              <p className="font-semibold text-gray-800 text-base mb-0.5">Enjoyed your visit?</p>
-              <p className="text-gray-500 text-sm">Scan to leave us a Google review ⭐</p>
-              <p className="text-gray-400 text-xs mt-1">It means the world to us!</p>
+        {/* QR + Done — always visible at bottom */}
+        <div className="flex-shrink-0 flex items-center gap-3 mt-auto">
+          {showQr && (
+            <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-100 px-3 py-2 flex-shrink-0">
+              <QRCodeSVG value={googleReviewUrl} size={44} />
+              <div>
+                <p className="text-xs font-semibold text-gray-700 leading-tight">Leave a review</p>
+                <p className="text-xs text-gray-400">Scan ⭐</p>
+              </div>
             </div>
-          </div>
-        )}
-
-        {/* Done button */}
-        <button
-          onClick={() => { setFading(true); setTimeout(onGoBack, 400) }}
-          className="w-full py-4 rounded-2xl font-bold text-white text-lg transition-all active:scale-95 hover:opacity-90 mt-auto"
-          style={{ backgroundColor: '#2c2c2a' }}
-        >
-          Done — Tap to start over
-        </button>
+          )}
+          <button
+            onClick={goBack}
+            className="flex-1 rounded-2xl font-bold text-white text-base transition-all active:scale-95 hover:opacity-90"
+            style={{ backgroundColor: '#2c2c2a', height: 52 }}
+          >
+            Done — Tap to start over
+          </button>
+        </div>
 
       </div>
     </div>
