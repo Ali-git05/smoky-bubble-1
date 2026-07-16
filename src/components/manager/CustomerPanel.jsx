@@ -46,29 +46,28 @@ export default function CustomerPanel({ customer: init, settings, onCustomerUpda
     if (undoVape?.timerId) clearTimeout(undoVape.timerId)
     const { maxPunches, rewardTiers, rewardMessage } = settings
     const { data: fresh } = await supabase.from('customers')
-      .select('current_punches, total_rewards_earned, vape_under20_count, vape_over20_count')
+      .select('total_rewards_earned, vape_under20_count, vape_over20_count')
       .eq('id', customer.id).single()
-    const punchesBefore = fresh?.current_punches ?? customer.current_punches ?? 0
+    const prevU20 = fresh?.vape_under20_count ?? customer.vape_under20_count ?? 0
+    const prevO20 = fresh?.vape_over20_count ?? customer.vape_over20_count ?? 0
+    const punchesBefore = prevU20 + prevO20
     const prevSnapshot = {
-      current_punches: punchesBefore,
       total_rewards_earned: fresh?.total_rewards_earned ?? customer.total_rewards_earned ?? 0,
-      vape_under20_count: fresh?.vape_under20_count ?? customer.vape_under20_count ?? 0,
-      vape_over20_count: fresh?.vape_over20_count ?? customer.vape_over20_count ?? 0,
+      vape_under20_count: prevU20,
+      vape_over20_count: prevO20,
     }
-    let punchesAfter = punchesBefore + 1
+    const punchesAfter = punchesBefore + 1
     let rewardEarned = null
     let newTotalRewards = fresh?.total_rewards_earned ?? customer.total_rewards_earned ?? 0
-    if (punchesAfter >= maxPunches) {
-      punchesAfter = 0
+    if (punchesAfter % maxPunches === 0) {
       newTotalRewards += 1
       const applicable = [...(rewardTiers || [])].filter(t => t.threshold <= newTotalRewards).sort((a, b) => b.threshold - a.threshold)
       rewardEarned = applicable[0]?.name || rewardMessage
     }
     const vapeField = vapeType === VAPE_U20 ? 'vape_under20_count' : 'vape_over20_count'
-    const newVapeCount = (fresh?.[vapeField] ?? customer[vapeField] ?? 0) + 1
+    const newVapeCount = (vapeType === VAPE_U20 ? prevU20 : prevO20) + 1
     const [{ data: updated }] = await Promise.all([
       supabase.from('customers').update({
-        current_punches: punchesAfter,
         total_rewards_earned: newTotalRewards,
         [vapeField]: newVapeCount,
       }).eq('id', customer.id).select().single(),
@@ -86,7 +85,8 @@ export default function CustomerPanel({ customer: init, settings, onCustomerUpda
     if (busy) return
     setBusy(true)
     if (undoPoints?.timerId) clearTimeout(undoPoints.timerId)
-    const prevTotal = customer.total_points ?? 0
+    const { data: fresh } = await supabase.from('customers').select('total_points').eq('id', customer.id).single()
+    const prevTotal = fresh?.total_points ?? customer.total_points ?? 0
     const { data } = await supabase.from('customers').update({ total_points: prevTotal + amount }).eq('id', customer.id).select().single()
     if (data) { setCustomer(data); onCustomerUpdated?.(data) }
     const timerId = setTimeout(() => setUndoPoints(null), 5000)
@@ -124,7 +124,7 @@ export default function CustomerPanel({ customer: init, settings, onCustomerUpda
     const newU20 = remainder - newO20
     const [{ data }] = await Promise.all([
       supabase.from('customers')
-        .update({ vape_under20_count: newU20, vape_over20_count: newO20, current_punches: remainder })
+        .update({ vape_under20_count: newU20, vape_over20_count: newO20 })
         .eq('id', customer.id).select().single(),
       supabase.from('rewards_earned')
         .update({ redeemed: true })
