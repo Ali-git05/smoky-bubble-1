@@ -119,9 +119,11 @@ export default function CustomerPanel({ customer: init, settings, onCustomerUpda
     const { data: fresh } = await supabase.from('customers').select('vape_under20_count, vape_over20_count').eq('id', customer.id).single()
     const freshU20 = Number(fresh?.vape_under20_count) || 0
     const freshO20 = Number(fresh?.vape_over20_count) || 0
-    const remainder = Math.max(0, freshU20 + freshO20 - vapeThreshold)
-    const newO20 = Math.min(freshO20, remainder)
-    const newU20 = remainder - newO20
+    const toSubtract = Math.min(freshU20 + freshO20, vapeThreshold)
+    const fromO20 = Math.min(freshO20, toSubtract)
+    const fromU20 = toSubtract - fromO20
+    const newU20 = freshU20 - fromU20
+    const newO20 = freshO20 - fromO20
     const [{ data }] = await Promise.all([
       supabase.from('customers')
         .update({ vape_under20_count: newU20, vape_over20_count: newO20 })
