@@ -16,6 +16,7 @@ export default function CustomerPanel({ customer: init, settings, onCustomerUpda
   const [undoVape, setUndoVape] = useState(null)
   const [undoPoints, setUndoPoints] = useState(null)
   const [pointsConfirm, setPointsConfirm] = useState(null)
+  const [rewardPunchType, setRewardPunchType] = useState(null)
 
   useEffect(() => {
     setCustomer(init)
@@ -75,7 +76,11 @@ export default function CustomerPanel({ customer: init, settings, onCustomerUpda
     ])
     if (rewardEarned) await supabase.from('rewards_earned').insert({ customer_id: customer.id, reward_name: rewardEarned, redeemed: false })
     if (updated) { setCustomer(updated); onCustomerUpdated?.(updated) }
-    if (rewardEarned) { setCongrats(rewardEarned); setTimeout(() => setCongrats(null), 5000) }
+    if (rewardEarned) {
+      setRewardPunchType(vapeType === VAPE_U20 ? 'under20' : 'over20')
+      setCongrats(rewardEarned)
+      setTimeout(() => setCongrats(null), 5000)
+    }
     const timerId = setTimeout(() => setUndoVape(null), 5000)
     setUndoVape({ tier: vapeType === VAPE_U20 ? 'under20' : 'over20', prev: prevSnapshot, rewardEarned: !!rewardEarned, timerId })
     setBusy(false)
@@ -134,6 +139,7 @@ export default function CustomerPanel({ customer: init, settings, onCustomerUpda
         .eq('redeemed', false),
     ])
     if (data) { setCustomer(data); onCustomerUpdated?.(data) }
+    setRewardPunchType(null)
     setBusy(false)
   }
 
@@ -204,7 +210,9 @@ export default function CustomerPanel({ customer: init, settings, onCustomerUpda
   const vapeO20 = Number(customer.vape_over20_count) || 0
   const vapeTotal = vapeU20 + vapeO20
   const vapeRewardEarned = vapeTotal >= vapeThreshold
-  const vapeRewardTier = vapeRewardEarned ? (vapeO20 > vapeU20 ? 'over20' : 'under20') : null
+  const vapeRewardTier = vapeRewardEarned
+    ? (rewardPunchType || (vapeO20 >= vapeU20 ? 'over20' : 'under20'))
+    : null
 
   const eligibleTiers = (settings.pointsTiers || []).filter(t => points >= Number(t.threshold))
 
