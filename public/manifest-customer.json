@@ -1,0 +1,20 @@
+{
+  "name": "Smoky Bubble",
+  "short_name": "Smoky Bubble",
+  "description": "Smoky Bubble Loyalty Kiosk",
+  "id": "/customer",
+  "start_url": "/customer",
+  "scope": "/",
+  "display": "fullscreen",
+  "background_color": "#ffffff",
+  "theme_color": "#2c2c2a",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

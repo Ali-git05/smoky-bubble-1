@@ -1,49 +1,86 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
-const DEFAULT_REWARDS = [
-  { emoji: '🏷', name: '10% off purchase', pts: 150 },
-  { emoji: '🎁', name: 'Free wrap', pts: 200 },
-  { emoji: '💨', name: 'Free vape kit', pts: 500 },
-  { emoji: '⭐', name: 'Premium bundle', pts: 750 },
-]
+export const DEFAULTS = {
+  maxPunches: 7,
+  rewardTiers: [
+    { name: 'Free vape under $20', threshold: 1 },
+    { name: 'Free premium vape', threshold: 6 },
+  ],
+  rewardMessage: 'Congratulations! You earned a reward!',
+  vipThreshold: 200,
+  vipMessage: 'Welcome back, VIP ⭐',
+  giftTiers: [
+    { threshold: 300, message: 'You have earned a special gift! Ask staff for details.' },
+    { threshold: 500, message: 'You have earned an exclusive VIP gift! Ask staff for details.' },
+  ],
+  shopName: 'Smoky Bubble',
+  vapeTiers: { threshold: 20, tier1: 'Free vape under $20', tier2: 'Free premium vape' },
+  pointsTiers: [{ threshold: 100, message: 'You earned a special reward — ask staff to redeem!' }],
+  qrCodeUrl: '',
+  managerPassword: '',
+  rewards: [],
+  pointsPerDollar: 1,
+  vapeThreshold: 7,
+  googleReviewUrl: '',
+  vapeCardTitle: 'Vape Punch Card',
+  vapeUnder20Label: 'Under $20 vapes',
+  vapeOver20Label: 'Over $20 vapes',
+}
+
+function tryParse(str, fallback) {
+  try {
+    const parsed = JSON.parse(str)
+    return Array.isArray(parsed) ? parsed : fallback
+  } catch {
+    return fallback
+  }
+}
+
+function tryParseObj(str, fallback) {
+  try {
+    const parsed = JSON.parse(str)
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : fallback
+  } catch {
+    return fallback
+  }
+}
 
 export function useSettings() {
-  const [pointsPerDollar, setPointsPerDollar] = useState(1)
-  const [vapeThreshold, setVapeThreshold] = useState(7)
-  const [googleReviewUrl, setGoogleReviewUrl] = useState('')
-  const [rewards, setRewards] = useState(DEFAULT_REWARDS)
-  const [vapeCardTitle, setVapeCardTitle] = useState('Vape Punch Card')
-  const [vapeUnder20Label, setVapeUnder20Label] = useState('Under $20 vapes')
-  const [vapeOver20Label, setVapeOver20Label] = useState('Over $20 vapes')
+  const [settings, setSettings] = useState(DEFAULTS)
   const [loading, setLoading] = useState(true)
 
   const parseSettings = useCallback((rows) => {
-    if (!rows || rows.length === 0) return
+    if (!rows?.length) return
     const map = {}
-    rows.forEach((row) => { map[row.key] = row.value })
-    if (map.points_per_dollar !== undefined) setPointsPerDollar(Number(map.points_per_dollar) || 1)
-    if (map.vape_threshold !== undefined) setVapeThreshold(Number(map.vape_threshold) || 7)
-    if (map.google_review_url !== undefined) setGoogleReviewUrl(map.google_review_url)
-    if (map.rewards !== undefined) {
-      try {
-        const parsed = JSON.parse(map.rewards)
-        if (Array.isArray(parsed)) setRewards(parsed)
-      } catch { setRewards(DEFAULT_REWARDS) }
-    }
-    if (map.vape_card_title !== undefined) setVapeCardTitle(map.vape_card_title)
-    if (map.vape_under20_label !== undefined) setVapeUnder20Label(map.vape_under20_label)
-    if (map.vape_over20_label !== undefined) setVapeOver20Label(map.vape_over20_label)
+    rows.forEach(r => { map[r.key] = r.value })
+    setSettings({
+      maxPunches: Number(map.max_punches) || DEFAULTS.maxPunches,
+      rewardTiers: tryParse(map.reward_tiers, DEFAULTS.rewardTiers),
+      rewardMessage: map.reward_message ?? DEFAULTS.rewardMessage,
+      vipThreshold: Number(map.vip_threshold) || DEFAULTS.vipThreshold,
+      vipMessage: map.vip_message ?? DEFAULTS.vipMessage,
+      giftTiers: tryParse(map.gift_tiers, DEFAULTS.giftTiers),
+      shopName: map.shop_name ?? DEFAULTS.shopName,
+      vapeTiers: tryParseObj(map.vape_tiers, DEFAULTS.vapeTiers),
+      pointsTiers: tryParse(map.points_tiers, DEFAULTS.pointsTiers),
+      qrCodeUrl: map.qr_code_url ?? DEFAULTS.qrCodeUrl,
+      managerPassword: map.manager_password ?? DEFAULTS.managerPassword,
+      rewards: tryParse(map.rewards, DEFAULTS.rewards),
+      pointsPerDollar: Number(map.points_per_dollar) || DEFAULTS.pointsPerDollar,
+      vapeThreshold: Number(map.vape_threshold) || DEFAULTS.vapeThreshold,
+      googleReviewUrl: map.google_review_url ?? DEFAULTS.googleReviewUrl,
+      vapeCardTitle: map.vape_card_title ?? DEFAULTS.vapeCardTitle,
+      vapeUnder20Label: map.vape_under20_label ?? DEFAULTS.vapeUnder20Label,
+      vapeOver20Label: map.vape_over20_label ?? DEFAULTS.vapeOver20Label,
+    })
   }, [])
 
   const fetchSettings = useCallback(async () => {
     setLoading(true)
     try {
       const { data, error } = await supabase.from('settings').select('*')
-      if (error) throw error
-      parseSettings(data)
-    } catch (err) {
-      console.error('Failed to load settings:', err)
+      if (!error) parseSettings(data)
     } finally {
       setLoading(false)
     }
@@ -51,16 +88,12 @@ export function useSettings() {
 
   useEffect(() => {
     fetchSettings()
-    const channel = supabase
-      .channel('settings-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, () => { fetchSettings() })
+    const ch = supabase
+      .channel('settings-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, fetchSettings)
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    return () => supabase.removeChannel(ch)
   }, [fetchSettings])
 
-  return {
-    pointsPerDollar, vapeThreshold, googleReviewUrl, rewards,
-    vapeCardTitle, vapeUnder20Label, vapeOver20Label,
-    loading, refetch: fetchSettings,
-  }
+  return { ...settings, loading, refetch: fetchSettings }
 }

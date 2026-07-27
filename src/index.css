@@ -16,6 +16,10 @@ input, textarea {
   -webkit-user-select: text;
 }
 
+html {
+  background-color: white;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   overscroll-behavior: none;
@@ -23,6 +27,7 @@ body {
   position: fixed;
   width: 100%;
   height: 100%;
+  background-color: white;
 }
 
 #root {

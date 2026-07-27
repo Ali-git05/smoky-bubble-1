@@ -17,8 +17,15 @@
     <!-- Home screen icons (Apple) -->
     <link rel="apple-touch-icon" href="/logo.png" />
 
-    <!-- PWA manifest -->
-    <link rel="manifest" href="/manifest.json" />
+    <!-- PWA manifest — swapped per route so staff and customer install as separate apps -->
+    <link rel="manifest" href="/manifest-staff.json" id="pwa-manifest" />
+    <script>
+      (function () {
+        if (window.location.pathname.startsWith('/customer')) {
+          document.getElementById('pwa-manifest').href = '/manifest-customer.json';
+        }
+      })();
+    </script>
 
     <title>Smoky Bubble</title>
   </head>

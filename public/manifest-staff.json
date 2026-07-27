@@ -1,0 +1,20 @@
+{
+  "name": "Smoky Bubble Staff",
+  "short_name": "SB Staff",
+  "description": "Smoky Bubble Staff Dashboard",
+  "id": "/staff",
+  "start_url": "/staff",
+  "scope": "/",
+  "display": "fullscreen",
+  "background_color": "#ffffff",
+  "theme_color": "#2c2c2a",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
