@@ -2,11 +2,11 @@
   "name": "Smoky Bubble",
   "short_name": "Smoky Bubble",
   "description": "Smoky Bubble Loyalty Program",
-  "start_url": "/",
-  "display": "standalone",
+  "start_url": "/staff",
+  "display": "fullscreen",
   "background_color": "#ffffff",
   "theme_color": "#2c2c2a",
-  "orientation": "portrait",
+  "orientation": "landscape",
   "icons": [
     {
       "src": "/logo.png",
