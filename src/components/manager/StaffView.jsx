@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import CustomerPanel from './CustomerPanel'
 import SettingsPanel from './SettingsPanel'
@@ -164,6 +165,13 @@ export default function StaffView({ settings }) {
 
         {/* Placeholder for other tabs in left panel */}
         {activeTab !== 'live' && <div className="flex-1" />}
+
+        {/* Footer links */}
+        <div className="flex gap-3 px-4 py-3 border-t border-gray-100 flex-shrink-0">
+          <Link to="/privacy" className="text-gray-300 text-xs hover:text-gray-500 underline">Privacy Policy</Link>
+          <span className="text-gray-200 text-xs">·</span>
+          <Link to="/terms" className="text-gray-300 text-xs hover:text-gray-500 underline">SMS Terms</Link>
+        </div>
       </aside>
 
       {/* RIGHT PANEL — remaining width */}
