@@ -60,9 +60,15 @@ export default function KioskPage() {
         setDigits('')
         setPhase('name')
       } else {
-        const updated = await recordCheckin(existing)
-        setCheckedInCustomer(updated)
-        setPhase('profile')
+        if (!existing.dob || !existing.sms_opt_in) {
+          const updated = await recordCheckin(existing)
+          setCheckedInCustomer(updated)
+          setPhase('update-info')
+        } else {
+          const updated = await recordCheckin(existing)
+          setCheckedInCustomer(updated)
+          setPhase('profile')
+        }
       }
     } catch {
       setError('Something went wrong. Please try again.')
@@ -112,6 +118,21 @@ export default function KioskPage() {
     setBusy(false)
   }
 
+  async function submitUpdateInfo() {
+    if (!dob || !smsOptIn || busy) return
+    setBusy(true)
+    try {
+      const { data: updated } = await supabase
+        .from('customers')
+        .update({ dob, sms_opt_in: true })
+        .eq('id', checkedInCustomer.id)
+        .select().single()
+      if (updated) setCheckedInCustomer(updated)
+    } catch { /* non-blocking, still proceed */ }
+    setBusy(false)
+    setPhase('profile')
+  }
+
   function reset() {
     setCheckedInCustomer(null)
     setPendingPhone('')
@@ -123,6 +144,61 @@ export default function KioskPage() {
     setBusy(false)
     submitLock.current = false
     setPhase('phone')
+  }
+
+  if (phase === 'update-info' && checkedInCustomer) {
+    const canSubmit = dob && smsOptIn && !busy
+    return (
+      <div className="h-screen bg-white flex flex-col items-center justify-center px-10 select-none gap-6">
+        <h1 className="text-gray-900 font-bold text-3xl text-center">
+          Welcome back, {checkedInCustomer.name}!
+        </h1>
+        <p className="text-gray-400 text-center text-base max-w-sm">
+          We need a couple more details to keep your account up to date.
+        </p>
+
+        <div className="w-full max-w-sm flex flex-col gap-4">
+          {/* DOB — only show if missing */}
+          {!checkedInCustomer.dob && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-gray-500 text-sm font-medium">Date of Birth <span className="text-red-500">*</span></label>
+              <input
+                type="date"
+                value={dob}
+                onChange={e => setDob(e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
+                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 text-base outline-none focus:border-gray-400"
+              />
+            </div>
+          )}
+
+          {/* SMS opt-in — only show if not yet opted in */}
+          {!checkedInCustomer.sms_opt_in && (
+            <label className="flex items-start gap-3 cursor-pointer" onClick={() => setSmsOptIn(v => !v)}>
+              <div className={`mt-0.5 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors ${smsOptIn ? 'bg-red-600 border-red-600' : 'border-gray-300 bg-white'}`}>
+                {smsOptIn && <span className="text-white text-xs font-bold">✓</span>}
+              </div>
+              <span className="text-gray-500 text-sm leading-relaxed">
+                I agree to receive recurring SMS messages from Smoky Bubble about my loyalty points, rewards, and promotions. Message and data rates may apply. Reply STOP to unsubscribe.{' '}
+                <Link to="/terms" className="underline text-gray-400" onClick={e => e.stopPropagation()}>Terms</Link>
+                {' · '}
+                <Link to="/privacy" className="underline text-gray-400" onClick={e => e.stopPropagation()}>Privacy</Link>
+              </span>
+            </label>
+          )}
+        </div>
+
+        <div className="flex gap-3 w-full max-w-sm">
+          <button onClick={reset} className="flex-1 bg-gray-100 text-gray-400 font-semibold rounded-2xl py-5 text-lg hover:bg-gray-200 active:scale-95 transition-all">
+            Skip
+          </button>
+          <button onClick={submitUpdateInfo} disabled={!canSubmit}
+            className="flex-[2] bg-red-600 hover:bg-red-500 text-white font-bold rounded-2xl py-5 text-lg active:scale-95 transition-all disabled:opacity-30">
+            {busy ? '…' : 'Save & Continue'}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   if (phase === 'loading') {
