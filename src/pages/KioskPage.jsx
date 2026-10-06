@@ -325,7 +325,7 @@ export default function KioskPage() {
         <div className="mt-2 flex gap-3 text-gray-300 text-xs">
           <Link to="/privacy" className="hover:text-gray-400 underline">Privacy Policy</Link>
           <span>·</span>
-          <Link to="/terms" className="hover:text-gray-400 underline">SMS Terms</Link>
+          <Link to="/terms" className="hover:text-gray-400 underline">Terms & Conditions</Link>
         </div>
       </div>
     </div>

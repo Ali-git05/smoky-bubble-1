@@ -4,7 +4,7 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-white px-6 py-10 max-w-2xl mx-auto">
       <Link to="/customer" className="text-gray-400 text-sm hover:text-gray-600 mb-8 inline-block">← Back</Link>
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Smoky Bubble — SMS Terms &amp; Conditions</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Terms &amp; Conditions</h1>
       <div className="text-gray-700 space-y-4 text-base leading-relaxed mt-6">
         <p><strong>Program:</strong> Smoky Bubble Loyalty Rewards SMS Program</p>
         <p>You will receive recurring SMS messages about your points balance, rewards, birthday offers, and promotions.</p>

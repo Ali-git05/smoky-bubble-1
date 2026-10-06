@@ -170,7 +170,7 @@ export default function StaffView({ settings }) {
         <div className="flex gap-3 px-4 py-3 border-t border-gray-100 flex-shrink-0">
           <Link to="/privacy" className="text-gray-300 text-xs hover:text-gray-500 underline">Privacy Policy</Link>
           <span className="text-gray-200 text-xs">·</span>
-          <Link to="/terms" className="text-gray-300 text-xs hover:text-gray-500 underline">SMS Terms</Link>
+          <Link to="/terms" className="text-gray-300 text-xs hover:text-gray-500 underline">Terms & Conditions</Link>
         </div>
       </aside>
 
