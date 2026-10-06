@@ -319,7 +319,10 @@ export default function KioskPage() {
           ))}
         </div>
         <p className="text-gray-300 text-xs mt-4">Tap your 10-digit number to check in</p>
-        <div className="mt-4 flex gap-3 text-gray-300 text-xs">
+        <p className="text-gray-300 text-xs mt-3 text-center max-w-xs leading-relaxed px-2">
+          By signing up, you agree to receive recurring SMS messages about loyalty points, rewards, and promotions. Message & data rates may apply. Reply STOP to unsubscribe.
+        </p>
+        <div className="mt-2 flex gap-3 text-gray-300 text-xs">
           <Link to="/privacy" className="hover:text-gray-400 underline">Privacy Policy</Link>
           <span>·</span>
           <Link to="/terms" className="hover:text-gray-400 underline">SMS Terms</Link>
