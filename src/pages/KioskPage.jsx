@@ -179,7 +179,7 @@ export default function KioskPage() {
                 {smsOptIn && <span className="text-white text-xs font-bold">✓</span>}
               </div>
               <span className="text-gray-500 text-sm leading-relaxed">
-                I agree to receive recurring SMS messages (max 4/month) from Smoky Bubble about my loyalty points, rewards, and promotions. Message and data rates may apply. Reply STOP to unsubscribe.{' '}
+                I agree to receive recurring SMS messages (msg frequency varies, max 4/month) from Smoky Bubble about my loyalty points, rewards, and promotions. Message and data rates may apply. Reply STOP to unsubscribe.{' '}
                 <Link to="/terms" className="underline text-gray-400" onClick={e => e.stopPropagation()}>Terms</Link>
                 {' · '}
                 <Link to="/privacy" className="underline text-gray-400" onClick={e => e.stopPropagation()}>Privacy</Link>
@@ -244,7 +244,7 @@ export default function KioskPage() {
               {smsOptIn && <span className="text-white text-xs font-bold">✓</span>}
             </div>
             <span className="text-gray-500 text-xs leading-relaxed">
-              I agree to receive recurring SMS messages (max 4/month) from Smoky Bubble about my loyalty points, rewards, and promotions. Message and data rates may apply. Reply STOP to unsubscribe.{' '}
+              I agree to receive recurring SMS messages (msg frequency varies, max 4/month) from Smoky Bubble about my loyalty points, rewards, and promotions. Message and data rates may apply. Reply STOP to unsubscribe.{' '}
               <Link to="/terms" className="underline text-gray-400" onClick={e => e.stopPropagation()}>Terms</Link>
               {' · '}
               <Link to="/privacy" className="underline text-gray-400" onClick={e => e.stopPropagation()}>Privacy</Link>

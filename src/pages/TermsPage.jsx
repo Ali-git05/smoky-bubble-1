@@ -8,11 +8,12 @@ export default function TermsPage() {
       <div className="text-gray-700 space-y-4 text-base leading-relaxed mt-6">
         <p><strong>Program:</strong> Smoky Bubble Loyalty Rewards SMS Program</p>
         <p>You will receive recurring SMS messages about your points balance, rewards, birthday offers, and promotions.</p>
-        <p>Message and data rates may apply.</p>
-        <p>Message frequency varies.</p>
-        <p>To opt out, reply STOP to any message.</p>
-        <p>To get help, reply HELP or visit <span className="text-gray-900 font-medium">smokybubbles.com</span></p>
         <p>Mobile information and messaging consent will not be shared with third parties or affiliates for marketing or promotional purposes.</p>
+
+        <h2 className="text-lg font-bold text-gray-900 pt-2">SMS Terms</h2>
+        <p>Message and data rates may apply. Message frequency varies, max 4 per month. Reply STOP to unsubscribe or HELP for help. Smoky Bubble.</p>
+
+        <p>To get help, reply HELP or visit <span className="text-gray-900 font-medium">smoky-bubble.vercel.app</span></p>
       </div>
     </div>
   )
