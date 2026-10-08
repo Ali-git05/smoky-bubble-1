@@ -11,7 +11,7 @@ export default function TermsPage() {
         <p>Mobile information and messaging consent will not be shared with third parties or affiliates for marketing or promotional purposes.</p>
 
         <h2 className="text-lg font-bold text-gray-900 pt-2">SMS Terms</h2>
-        <p>Message and data rates may apply. Message frequency varies, max 4 per month. Reply STOP to unsubscribe or HELP for help. Smoky Bubble.</p>
+        <p>Message and data rates may apply. Message frequency varies, max 4 per month. Reply STOP to cancel or HELP for help. Consent is not a condition of purchase. Smoky Bubble.</p>
 
         <p>To get help, reply HELP or visit <span className="text-gray-900 font-medium">smoky-bubble.vercel.app</span></p>
       </div>

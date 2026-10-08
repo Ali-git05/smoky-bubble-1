@@ -179,7 +179,7 @@ export default function KioskPage() {
                 {smsOptIn && <span className="text-white text-xs font-bold">✓</span>}
               </div>
               <span className="text-gray-500 text-sm leading-relaxed">
-                I agree to receive recurring SMS messages (msg frequency varies, max 4/month) from Smoky Bubble about my loyalty points, rewards, and promotions. Message and data rates may apply. Reply STOP to unsubscribe.{' '}
+                I agree to receive recurring automated SMS messages (msg frequency varies, max 4/month) from Smoky Bubble about loyalty points, rewards, and promotions. Msg & data rates may apply. Reply STOP to cancel, HELP for help. Consent is not a condition of purchase.{' '}
                 <Link to="/terms" className="underline text-gray-400" onClick={e => e.stopPropagation()}>Terms</Link>
                 {' · '}
                 <Link to="/privacy" className="underline text-gray-400" onClick={e => e.stopPropagation()}>Privacy</Link>
@@ -244,7 +244,7 @@ export default function KioskPage() {
               {smsOptIn && <span className="text-white text-xs font-bold">✓</span>}
             </div>
             <span className="text-gray-500 text-xs leading-relaxed">
-              I agree to receive recurring SMS messages (msg frequency varies, max 4/month) from Smoky Bubble about my loyalty points, rewards, and promotions. Message and data rates may apply. Reply STOP to unsubscribe.{' '}
+              I agree to receive recurring automated SMS messages (msg frequency varies, max 4/month) from Smoky Bubble about loyalty points, rewards, and promotions. Msg & data rates may apply. Reply STOP to cancel, HELP for help. Consent is not a condition of purchase.{' '}
               <Link to="/terms" className="underline text-gray-400" onClick={e => e.stopPropagation()}>Terms</Link>
               {' · '}
               <Link to="/privacy" className="underline text-gray-400" onClick={e => e.stopPropagation()}>Privacy</Link>
@@ -320,7 +320,7 @@ export default function KioskPage() {
         </div>
         <p className="text-gray-300 text-xs mt-4">Tap your 10-digit number to check in</p>
         <p className="text-gray-300 text-xs mt-3 text-center max-w-xs leading-relaxed px-2">
-          By signing up, you agree to receive recurring SMS messages about loyalty points, rewards, and promotions. Message & data rates may apply. Reply STOP to unsubscribe.
+          By signing up, you agree to receive recurring automated SMS messages (max 4/mo) from Smoky Bubble about loyalty points, rewards & promotions. Msg & data rates may apply. Reply STOP to cancel, HELP for help. Consent not required to purchase.
         </p>
         <div className="mt-2 flex gap-3 text-gray-300 text-xs">
           <Link to="/privacy" className="hover:text-gray-400 underline">Privacy Policy</Link>
