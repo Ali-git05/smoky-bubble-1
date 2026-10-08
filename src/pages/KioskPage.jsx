@@ -319,14 +319,17 @@ export default function KioskPage() {
           ))}
         </div>
         <p className="text-gray-300 text-xs mt-4">Tap your 10-digit number to check in</p>
-        <p className="text-gray-300 text-xs mt-3 text-center max-w-xs leading-relaxed px-2">
-          By signing up, you agree to receive recurring automated SMS messages (max 4/mo) from Smoky Bubble about loyalty points, rewards & promotions. Msg & data rates may apply. Reply STOP to cancel, HELP for help. Consent not required to purchase.
-        </p>
-        <div className="mt-2 flex gap-3 text-gray-300 text-xs">
-          <Link to="/privacy" className="hover:text-gray-400 underline">Privacy Policy</Link>
-          <span>·</span>
-          <Link to="/terms" className="hover:text-gray-400 underline">Terms & Conditions</Link>
-        </div>
+        <label className="flex items-start gap-3 mt-4 w-full max-w-md cursor-pointer" onClick={() => setSmsOptIn(v => !v)}>
+          <div className={`mt-0.5 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors ${smsOptIn ? 'bg-red-600 border-red-600' : 'border-gray-300 bg-white'}`}>
+            {smsOptIn && <span className="text-white text-xs font-bold">✓</span>}
+          </div>
+          <span className="text-gray-400 text-xs leading-relaxed">
+            I agree to receive recurring automated SMS messages (msg frequency varies, max 4/month) from Smoky Bubble about loyalty points, rewards, and promotions. Msg &amp; data rates may apply. Reply STOP to cancel, HELP for help. Consent is not a condition of purchase.{' '}
+            <Link to="/terms" className="underline" onClick={e => e.stopPropagation()}>Terms</Link>
+            {' · '}
+            <Link to="/privacy" className="underline" onClick={e => e.stopPropagation()}>Privacy Policy</Link>
+          </span>
+        </label>
       </div>
     </div>
   )
