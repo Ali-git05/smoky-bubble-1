@@ -1,0 +1,690 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Smoky Bubble</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap">
+
+<style>
+  /* Layout: single-column, generous whitespace, warm dark-smoke palette */
+  :root {
+    --bg: #FAFAF8;
+    --bg2: #F2F0EB;
+    --fg: #1A1714;
+    --fg2: #5C5750;
+    --accent: #C96B2F;
+    --accent-light: #F4E3D5;
+    --border: #E0DDD7;
+    --card-bg: #FFFFFF;
+    --display: 'Playfair Display', Georgia, serif;
+    --body: 'Inter', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #18160F;
+      --bg2: #221F17;
+      --fg: #F0EDE6;
+      --fg2: #A09990;
+      --accent: #E07D3A;
+      --accent-light: #2E1E0E;
+      --border: #342F25;
+      --card-bg: #221F17;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #18160F;
+    --bg2: #221F17;
+    --fg: #F0EDE6;
+    --fg2: #A09990;
+    --accent: #E07D3A;
+    --accent-light: #2E1E0E;
+    --border: #342F25;
+    --card-bg: #221F17;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--body);
+    background: var(--bg);
+    color: var(--fg);
+    padding-inline: 24px;
+    padding-block: 0;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 20px;
+    border-bottom: 1px solid var(--border);
+    max-width: 960px;
+    margin-inline: auto;
+  }
+  .nav-logo {
+    font-family: var(--display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--fg);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-logo .bubble {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--fg2);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    max-width: 960px;
+    margin-inline: auto;
+    padding-block: 72px 56px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-size: clamp(2.2rem, 5vw, 3.25rem);
+    line-height: 1.15;
+    text-wrap: balance;
+    margin-bottom: 20px;
+  }
+  .hero-desc {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--fg2);
+    margin-bottom: 32px;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    padding: 13px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .hero-visual {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .rating-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .stars { color: #F5A623; font-size: 1.1rem; letter-spacing: 2px; }
+  .rating-num {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .rating-count { font-size: 0.875rem; color: var(--fg2); }
+  .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--fg);
+  }
+  .info-item .icon {
+    width: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--accent);
+    font-size: 1rem;
+  }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+  .status-dot {
+    width: 7px; height: 7px;
+    background: #3CB34A;
+    border-radius: 50%;
+  }
+
+  /* DIVIDER */
+  .divider {
+    max-width: 960px;
+    margin-inline: auto;
+    border: none;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ABOUT */
+  .about {
+    max-width: 960px;
+    margin-inline: auto;
+    padding-block: 64px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+  .section-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .about h2 {
+    font-family: var(--display);
+    font-size: 2rem;
+    line-height: 1.2;
+    text-wrap: balance;
+    margin-bottom: 16px;
+  }
+  .about p {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--fg2);
+  }
+  .about p + p { margin-top: 12px; }
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .feature-list li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .feature-icon {
+    width: 36px; height: 36px;
+    background: var(--accent-light);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .feature-text strong {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .feature-text span {
+    font-size: 0.875rem;
+    color: var(--fg2);
+    line-height: 1.5;
+  }
+
+  /* LOYALTY SECTION */
+  .loyalty {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .loyalty-inner {
+    max-width: 960px;
+    margin-inline: auto;
+    padding-block: 64px;
+  }
+  .loyalty-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .loyalty-header h2 {
+    font-family: var(--display);
+    font-size: 2rem;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .loyalty-header p {
+    font-size: 1rem;
+    color: var(--fg2);
+    max-width: 480px;
+    margin-inline: auto;
+    line-height: 1.65;
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .step-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+  }
+  .step-num {
+    font-family: var(--display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .step-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .step-card p {
+    font-size: 0.875rem;
+    color: var(--fg2);
+    line-height: 1.6;
+  }
+
+  /* SMS CONSENT */
+  .sms-section {
+    max-width: 960px;
+    margin-inline: auto;
+    padding-block: 64px;
+  }
+  .sms-section h2 {
+    font-family: var(--display);
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+  .sms-section > p {
+    color: var(--fg2);
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 32px;
+    max-width: 600px;
+  }
+  .consent-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+  .consent-label {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--fg);
+    margin-bottom: 20px;
+  }
+  .consent-label input[type="checkbox"] {
+    margin-top: 3px;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+  }
+  .consent-label a { color: var(--accent); }
+  .sms-terms {
+    font-size: 0.8125rem;
+    color: var(--fg2);
+    line-height: 1.65;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  /* CONTACT */
+  .contact {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+  }
+  .contact-inner {
+    max-width: 960px;
+    margin-inline: auto;
+    padding-block: 64px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  .contact h2 {
+    font-family: var(--display);
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+  .contact > .contact-inner > div > p {
+    font-size: 1rem;
+    color: var(--fg2);
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+  .contact-details {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .contact-details li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .contact-details .icon {
+    color: var(--accent);
+    font-size: 1rem;
+    margin-top: 2px;
+    width: 20px;
+    flex-shrink: 0;
+  }
+  .contact-details .detail-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--fg2);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .contact-details .detail-val {
+    font-size: 0.9375rem;
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .hours-grid {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .hours-grid h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--fg2);
+    margin-bottom: 16px;
+  }
+  .hours-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9375rem;
+    padding-block: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hours-row:last-child { border-bottom: none; }
+  .hours-row .day { color: var(--fg2); }
+  .hours-row .time { font-weight: 500; font-variant-numeric: tabular-nums; }
+  .hours-row.today { color: var(--accent); }
+  .hours-row.today .day, .hours-row.today .time { color: var(--accent); font-weight: 600; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding-block: 28px;
+  }
+  .footer-inner {
+    max-width: 960px;
+    margin-inline: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .footer-brand {
+    font-family: var(--display);
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .footer-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+  }
+  .footer-links a {
+    font-size: 0.8125rem;
+    color: var(--fg2);
+    text-decoration: none;
+  }
+  .footer-links a:hover { color: var(--accent); }
+  .footer-copy {
+    font-size: 0.8125rem;
+    color: var(--fg2);
+    width: 100%;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 680px) {
+    .hero, .about, .contact-inner {
+      grid-template-columns: 1fr;
+    }
+    .steps {
+      grid-template-columns: 1fr;
+    }
+    .hero { padding-block: 40px 32px; }
+    .nav-links { display: none; }
+    .footer-inner { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <span class="bubble">🫧</span>
+    Smoky Bubble
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#loyalty">Loyalty Program</a></li>
+    <li><a href="#sms">SMS Updates</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <p class="hero-eyebrow">Jacksonville's Favorite Smoke Shop</p>
+    <h1>Premium Products, Rewarding Every Visit</h1>
+    <p class="hero-desc">Smoky Bubble is a locally-owned tobacco and smoke shop on Beach Blvd, offering a curated selection of products and a loyalty rewards program that keeps regulars coming back.</p>
+    <a href="#loyalty" class="btn-primary">Join Our Loyalty Program →</a>
+  </div>
+  <div class="hero-visual">
+    <div class="rating-row">
+      <span class="stars">★★★★★</span>
+      <span class="rating-num">4.9</span>
+      <span class="rating-count">563 reviews</span>
+    </div>
+    <div class="info-item">
+      <span class="icon">📍</span>
+      <span>5912 Beach Blvd, Jacksonville, FL 32207</span>
+    </div>
+    <div class="info-item">
+      <span class="icon">📞</span>
+      <span>(904) 329-3183</span>
+    </div>
+    <div class="info-item">
+      <span class="icon">🌐</span>
+      <span>smokybubble.org</span>
+    </div>
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      Open · Closes 10 PM
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div>
+    <p class="section-eyebrow">Who We Are</p>
+    <h2>A Trusted Local Smoke Shop</h2>
+    <p>Smoky Bubble has been serving the Jacksonville community at 5912 Beach Blvd. We carry a wide selection of tobacco products, hookah supplies, vaping accessories, and more.</p>
+    <p>With nearly 600 five-star reviews, our customers trust us for knowledgeable service, quality products, and a welcoming atmosphere.</p>
+  </div>
+  <ul class="feature-list">
+    <li>
+      <div class="feature-icon">🪄</div>
+      <div class="feature-text">
+        <strong>Expert Staff</strong>
+        <span>Our team knows our products inside and out and is always happy to help you find what you need.</span>
+      </div>
+    </li>
+    <li>
+      <div class="feature-icon">🎁</div>
+      <div class="feature-text">
+        <strong>Loyalty Rewards</strong>
+        <span>Earn points on every purchase and redeem them for free items and discounts.</span>
+      </div>
+    </li>
+    <li>
+      <div class="feature-icon">📱</div>
+      <div class="feature-text">
+        <strong>SMS Notifications</strong>
+        <span>Opt in to receive loyalty point updates and rewards notifications by text.</span>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<!-- LOYALTY -->
+<section class="loyalty" id="loyalty">
+  <div class="loyalty-inner">
+    <div class="loyalty-header">
+      <p class="section-eyebrow">Smoky Bubble Rewards</p>
+      <h2>Earn Points on Every Visit</h2>
+      <p>Our loyalty program is free to join. Sign up in-store at our kiosk, earn points on every purchase, and redeem them for free products.</p>
+    </div>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <h3>Sign Up In-Store</h3>
+        <p>Visit us at 5912 Beach Blvd and register at our tablet kiosk. Just enter your name, phone number, and check the consent box to join.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <h3>Earn Points</h3>
+        <p>Every purchase earns you points. The more you shop, the more you earn. Points are tracked automatically with your phone number.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <h3>Redeem Rewards</h3>
+        <p>Once you've earned enough points, redeem them at checkout for discounts or free items. We'll text you when rewards are ready.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SMS SECTION -->
+<section class="sms-section" id="sms">
+  <p class="section-eyebrow">SMS Updates</p>
+  <h2>Stay in the Loop</h2>
+  <p>When you join our loyalty program, you can opt in to receive SMS notifications about your points balance and available rewards. We send a maximum of 4 messages per month.</p>
+  <div class="consent-box">
+    <label class="consent-label">
+      <input type="checkbox">
+      <span>I agree to receive recurring SMS messages (msg frequency varies, max 4/month) from Smoky Bubble about my loyalty points, rewards, and promotions. Message and data rates may apply. Reply STOP to unsubscribe. <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></span>
+    </label>
+    <p class="sms-terms">
+      <strong>SMS Terms:</strong> Message and data rates may apply. Message frequency varies, max 4 per month. Reply STOP to unsubscribe or HELP for help. Smoky Bubble · 5912 Beach Blvd, Jacksonville, FL 32207 · (904) 329-3183. We do not sell or share your SMS opt-in data or personal information with third parties for marketing purposes. View our <a href="/privacy" style="color:var(--accent)">Privacy Policy</a> and <a href="/terms" style="color:var(--accent)">Terms of Service</a>.
+    </p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-inner">
+    <div>
+      <p class="section-eyebrow">Find Us</p>
+      <h2>Visit Smoky Bubble</h2>
+      <p>We're located on Beach Blvd in Jacksonville, FL. Stop by any day of the week — no appointment needed.</p>
+      <ul class="contact-details">
+        <li>
+          <span class="icon">📍</span>
+          <div>
+            <span class="detail-label">Address</span>
+            <span class="detail-val">5912 Beach Blvd, Jacksonville, FL 32207</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon">📞</span>
+          <div>
+            <span class="detail-label">Phone</span>
+            <span class="detail-val">(904) 329-3183</span>
+          </div>
+        </li>
+        <li>
+          <span class="icon">🌐</span>
+          <div>
+            <span class="detail-label">Website</span>
+            <span class="detail-val">smokybubble.org</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="hours-grid">
+      <h3>Store Hours</h3>
+      <div class="hours-row"><span class="day">Monday</span><span class="time">10 AM – 10 PM</span></div>
+      <div class="hours-row"><span class="day">Tuesday</span><span class="time">10 AM – 10 PM</span></div>
+      <div class="hours-row"><span class="day">Wednesday</span><span class="time">10 AM – 10 PM</span></div>
+      <div class="hours-row"><span class="day">Thursday</span><span class="time">10 AM – 10 PM</span></div>
+      <div class="hours-row today"><span class="day">Friday</span><span class="time">10 AM – 10 PM</span></div>
+      <div class="hours-row"><span class="day">Saturday</span><span class="time">10 AM – 10 PM</span></div>
+      <div class="hours-row"><span class="day">Sunday</span><span class="time">10 AM – 10 PM</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-brand">Smoky Bubble</span>
+    <ul class="footer-links">
+      <li><a href="/privacy">Privacy Policy</a></li>
+      <li><a href="/terms">Terms of Service</a></li>
+    </ul>
+    <p class="footer-copy">© 2024 Smoky Bubble LLC · 5912 Beach Blvd, Jacksonville, FL 32207 · (904) 329-3183</p>
+  </div>
+</footer>
+
+</body></html>
