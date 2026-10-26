@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useState, useEffect } from 'react'
 
 const MONTHS = [
   'January','February','March','April','May','June',
@@ -17,48 +17,56 @@ const SELECT_CLASS =
   'hover:border-gray-300 active:bg-gray-100 transition-colors'
 
 export default function DOBPicker({ value, onChange, compact = false }) {
-  const [selYear, selMonth, selDay] = useMemo(() => {
-    if (!value) return ['', '', '']
-    const [y, m, d] = value.split('-')
-    return [y || '', m ? String(parseInt(m, 10)) : '', d ? String(parseInt(d, 10)) : '']
-  }, [value])
+  // Internal state — only sync upward when all three are filled
+  const [month, setMonth] = useState('')
+  const [day, setDay] = useState('')
+  const [year, setYear] = useState('')
 
-  const currentYear = new Date().getFullYear()
-  const years = useMemo(() => {
-    const arr = []
-    for (let y = currentYear; y >= 1920; y--) arr.push(y)
-    return arr
-  }, [currentYear])
+  // Seed from external value on mount / external reset only
+  useEffect(() => {
+    if (!value) {
+      setMonth(''); setDay(''); setYear('')
+    } else {
+      const [y, m, d] = value.split('-')
+      setYear(y || '')
+      setMonth(m ? String(parseInt(m, 10)) : '')
+      setDay(d ? String(parseInt(d, 10)) : '')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value === '' ? value : null]) // only re-seed on reset (value → '')
 
-  const maxDay = daysInMonth(selMonth ? parseInt(selMonth, 10) : null, selYear ? parseInt(selYear, 10) : null)
+  const maxDay = daysInMonth(month ? parseInt(month, 10) : null, year ? parseInt(year, 10) : null)
 
-  function emit(year, month, day) {
-    const m = month ? String(month).padStart(2, '0') : ''
-    const d = day ? String(day).padStart(2, '0') : ''
-    const y = year ? String(year) : ''
-    if (y && m && d) {
-      const num = parseInt(d, 10)
-      const max = daysInMonth(parseInt(m, 10), parseInt(y, 10))
-      const clampedDay = num > max ? max : num
-      onChange(`${y}-${m}-${String(clampedDay).padStart(2, '0')}`)
+  function notify(m, d, y) {
+    if (m && d && y) {
+      const clampedDay = Math.min(parseInt(d, 10), daysInMonth(parseInt(m, 10), parseInt(y, 10)))
+      onChange(`${y}-${String(m).padStart(2,'0')}-${String(clampedDay).padStart(2,'0')}`)
     } else {
       onChange('')
     }
   }
 
-  function onMonth(e) {
+  function handleMonth(e) {
     const m = e.target.value
-    emit(selYear, m, selDay)
+    setMonth(m)
+    // clamp day if it now exceeds new month's max
+    const clampedDay = day && m
+      ? String(Math.min(parseInt(day, 10), daysInMonth(parseInt(m, 10), year ? parseInt(year, 10) : null)))
+      : day
+    setDay(clampedDay)
+    notify(m, clampedDay, year)
   }
 
-  function onDay(e) {
+  function handleDay(e) {
     const d = e.target.value
-    emit(selYear, selMonth, d)
+    setDay(d)
+    notify(month, d, year)
   }
 
-  function onYear(e) {
+  function handleYear(e) {
     const y = e.target.value
-    emit(y, selMonth, selDay)
+    setYear(y)
+    notify(month, day, y)
   }
 
   const selectStyle = compact
@@ -67,41 +75,23 @@ export default function DOBPicker({ value, onChange, compact = false }) {
 
   return (
     <div className="flex gap-2 w-full">
-      {/* Month */}
-      <select
-        value={selMonth}
-        onChange={onMonth}
-        style={selectStyle}
-        className={SELECT_CLASS}
-      >
+      <select value={month} onChange={handleMonth} style={selectStyle} className={SELECT_CLASS}>
         <option value="">Month</option>
         {MONTHS.map((name, i) => (
           <option key={i + 1} value={i + 1}>{name}</option>
         ))}
       </select>
 
-      {/* Day */}
-      <select
-        value={selDay}
-        onChange={onDay}
-        style={{ ...selectStyle, maxWidth: compact ? 80 : 96 }}
-        className={SELECT_CLASS}
-      >
+      <select value={day} onChange={handleDay} style={{ ...selectStyle, maxWidth: compact ? 80 : 96 }} className={SELECT_CLASS}>
         <option value="">Day</option>
         {Array.from({ length: maxDay }, (_, i) => i + 1).map(d => (
           <option key={d} value={d}>{d}</option>
         ))}
       </select>
 
-      {/* Year */}
-      <select
-        value={selYear}
-        onChange={onYear}
-        style={{ ...selectStyle, maxWidth: compact ? 100 : 116 }}
-        className={SELECT_CLASS}
-      >
+      <select value={year} onChange={handleYear} style={{ ...selectStyle, maxWidth: compact ? 100 : 116 }} className={SELECT_CLASS}>
         <option value="">Year</option>
-        {years.map(y => (
+        {Array.from({ length: new Date().getFullYear() - 1919 }, (_, i) => new Date().getFullYear() - i).map(y => (
           <option key={y} value={y}>{y}</option>
         ))}
       </select>
