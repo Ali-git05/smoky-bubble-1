@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSettings } from '../hooks/useSettings'
 import CustomerCheckin from '../components/kiosk/CustomerCheckin'
+import DOBPicker from '../components/kiosk/DOBPicker'
 
 const PHONE_KEYS = ['1','2','3','4','5','6','7','8','9','CLR','0','⌫']
 
@@ -162,13 +163,7 @@ export default function KioskPage() {
           {!checkedInCustomer.dob && (
             <div className="flex flex-col gap-1.5">
               <label className="text-gray-500 text-sm font-medium">Date of Birth <span className="text-red-500">*</span></label>
-              <input
-                type="date"
-                value={dob}
-                onChange={e => setDob(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
-                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 text-base outline-none focus:border-gray-400"
-              />
+              <DOBPicker value={dob} onChange={setDob} compact />
             </div>
           )}
 
@@ -230,13 +225,7 @@ export default function KioskPage() {
           {/* DOB */}
           <div className="flex items-center gap-3 w-full max-w-3xl">
             <label className="text-gray-500 text-sm font-medium whitespace-nowrap">Date of Birth</label>
-            <input
-              type="date"
-              value={dob}
-              onChange={e => setDob(e.target.value)}
-              max={new Date().toISOString().split('T')[0]}
-              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 text-base outline-none focus:border-gray-400"
-            />
+            <DOBPicker value={dob} onChange={setDob} />
           </div>
           {/* SMS opt-in */}
           <label className="flex items-start gap-3 mt-3 w-full max-w-3xl cursor-pointer" onClick={() => setSmsOptIn(v => !v)}>
