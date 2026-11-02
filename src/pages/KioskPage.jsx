@@ -7,6 +7,20 @@ import DOBPicker from '../components/kiosk/DOBPicker'
 
 const PHONE_KEYS = ['1','2','3','4','5','6','7','8','9','CLR','0','⌫']
 
+const OPT_IN_MESSAGE = "Smoky Bubble: You're now opted in to SMS rewards updates. Msg frequency varies, max 4/month. Msg & data rates may apply. Reply STOP to opt out, HELP for help."
+
+async function sendOptInSms(phone) {
+  try {
+    await fetch('/api/send-sms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: phone, message: OPT_IN_MESSAGE }),
+    })
+  } catch {
+    // Non-blocking — enrollment still succeeds if SMS fails
+  }
+}
+
 const QWERTY_ROWS = [
   ['Q','W','E','R','T','Y','U','I','O','P'],
   ['A','S','D','F','G','H','J','K','L'],
@@ -111,6 +125,7 @@ export default function KioskPage() {
       if (err) throw err
       const updated = await recordCheckin(newCustomer)
       setCheckedInCustomer(updated)
+      sendOptInSms(pendingPhone)
       setPhase('profile')
     } catch (e) {
       setError(e?.message || 'Failed to create account. Please try again.')
@@ -130,6 +145,7 @@ export default function KioskPage() {
         .select().single()
       if (updated) setCheckedInCustomer(updated)
     } catch { /* non-blocking, still proceed */ }
+    if (smsOptIn) sendOptInSms(checkedInCustomer.phone)
     setBusy(false)
     setPhase('profile')
   }
