@@ -135,12 +135,15 @@ export default function KioskPage() {
   }
 
   async function submitUpdateInfo() {
-    if (!dob || !smsOptIn || busy) return
+    const hasDob = checkedInCustomer.dob || dob
+    if (!hasDob || !smsOptIn || busy) return
     setBusy(true)
     try {
+      const patch = { sms_opt_in: true }
+      if (!checkedInCustomer.dob && dob) patch.dob = dob
       const { data: updated } = await supabase
         .from('customers')
-        .update({ dob, sms_opt_in: true })
+        .update(patch)
         .eq('id', checkedInCustomer.id)
         .select().single()
       if (updated) setCheckedInCustomer(updated)
@@ -164,7 +167,7 @@ export default function KioskPage() {
   }
 
   if (phase === 'update-info' && checkedInCustomer) {
-    const canSubmit = dob && smsOptIn && !busy
+    const canSubmit = (checkedInCustomer.dob || dob) && smsOptIn && !busy
     return (
       <div className="h-screen bg-white flex flex-col items-center justify-center px-10 select-none gap-6">
         <h1 className="text-gray-900 font-bold text-3xl text-center">
