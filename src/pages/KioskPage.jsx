@@ -148,7 +148,7 @@ export default function KioskPage() {
         .select().single()
       if (updated) setCheckedInCustomer(updated)
     } catch { /* non-blocking, still proceed */ }
-    if (smsOptIn) sendOptInSms(checkedInCustomer.phone)
+    if (smsOptIn && !checkedInCustomer.sms_opt_in) sendOptInSms(checkedInCustomer.phone)
     setBusy(false)
     setPhase('profile')
   }

@@ -27,6 +27,10 @@ export default async function handler(req, res) {
     const msg = await client.messages.create({ from, to: e164, body: message })
     return res.status(200).json({ sid: msg.sid })
   } catch (err) {
+    if (err.code === 21610) {
+      console.log(`Twilio 21610: number has opted out, skipping SMS to ${e164}`)
+      return res.status(200).json({ skipped: true })
+    }
     console.error('Twilio error:', err)
     return res.status(500).json({ error: err.message })
   }
